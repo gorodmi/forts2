@@ -29,7 +29,7 @@ export class MenuView extends View {
         this.addChild(this.titleText)
 
         this.playButton = new Graphics()
-        this.playButton.interactive = true
+        this.playButton.eventMode = `static`
         this.playButton.cursor = "pointer"
         this.playButton.on("click", e => {Vars.viewManager.show("game")})
         this.playButton.lineStyle({width: 5, color: 0xFFFFFF})

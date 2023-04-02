@@ -69,9 +69,7 @@ export namespace Control {
             } else if (e.code === "Digit1") setControlType(ControlType.POINT_PLACE)
             else if (e.code.startsWith("Digit")) {
                 let digit = Number(e.code.substring(5))
-                if (digit - 2 >= Vars.gameView.selectors.length) return;
-                let selector = Vars.gameView.selectors[digit - 2]
-                selector.select()
+                Vars.gameView.menu.select(digit - 2)
             }
         })
 
@@ -119,6 +117,10 @@ export namespace Control {
     }
 
     export function updatePos() {
+        Vars.gameView.background.tileScale.set(Vars.gameView.camera.scale * 5, Vars.gameView.camera.scale * 5)
+        let pos = Vars.gameView.camera.canvasToScreen(Vars.gameView.camera.pos.copy)
+        Vars.gameView.background.tilePosition.set(pos.x, pos.y)
+
         if (buildingPoint !== undefined) {
             let pointPos = Vars.gameView.cursorPos.copy
             Vars.gameView.terrain.push(pointPos)
@@ -156,7 +158,7 @@ export namespace Control {
             unselect()
             removeBuildingPoint()
         } else if (controlType === ControlType.OBJECT_PLACE) {
-            Vars.gameView.unselectSelectors()
+            Vars.gameView.menu.unselectSelectors()
             removeBuildingObject()
         }
 

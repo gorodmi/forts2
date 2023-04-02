@@ -5,13 +5,11 @@ import {Vars} from "../data/Vars";
 import {Terrain} from "../objects/Terrain";
 import {Vector2} from "../data/Vector2";
 import {Camera} from "../data/Camera";
-import {Container, Graphics} from "pixi.js";
+import {Container, Graphics, Texture, TilingSprite} from "pixi.js";
 import {GameObject} from "../objects/objectTypes/GameObject";
 import {Control} from "../Control";
 import {GameElement} from "../objects/GameElement";
-import {ObjectSelectorButton} from "../ui/ObjectSelectorButton";
-import {BalloonObject} from "../objects/objectTypes/BalloonObject";
-import {RocketObject} from "../objects/objectTypes/RocketObject";
+import {Menu} from "../ui/Menu";
 
 export class GameView extends View {
     points: Array<Point> = []
@@ -23,14 +21,29 @@ export class GameView extends View {
 
     cursorPos: Vector2 = new Vector2()
 
+    menu: Menu
     gameContainer: Container
-    menuContainer: Container
-    menuBackground: Graphics
-    selectors: Array<ObjectSelectorButton> = []
     graphics: Graphics
+    background: TilingSprite
 
     constructor() {
-        super();
+        super()
+
+        this.background = new TilingSprite(Texture.from("https://cdn.discordapp.com/attachments/754410919119028306/1092016645460987965/AkkQaNf.png"))
+        this.background.uvRespectAnchor = true
+        this.addChild(this.background)
+
+        this.gameContainer = new Container()
+        this.gameContainer.sortableChildren = true
+        this.addChild(this.gameContainer)
+
+        this.menu = new Menu()
+        this.addChild(this.menu)
+
+        this.graphics = new Graphics()
+        this.gameContainer.addChild(this.graphics)
+
+        Control.init()
 
         this.terrain = new Terrain({
             points: [
@@ -50,40 +63,7 @@ export class GameView extends View {
                 {x: -2000, y: 2000},
             ]
         })
-
-        this.gameContainer = new Container()
-        this.gameContainer.sortableChildren = true
-        this.addChild(this.gameContainer)
         this.gameContainer.addChild(this.terrain.view)
-
-        this.menuContainer = new Container()
-        this.menuContainer.position.set(Vars.width / 6 * 5, 0)
-        this.addChild(this.menuContainer)
-
-        this.menuBackground = new Graphics()
-        this.menuBackground.beginFill(0xCCAAAA)
-        this.menuBackground.drawRect(0, 0, Vars.width / 6, Vars.height)
-        this.menuBackground.endFill()
-        this.menuContainer.addChild(this.menuBackground)
-
-        let balloonSelector = new ObjectSelectorButton("balloon", BalloonObject)
-        balloonSelector.position.set(107, 50)
-        this.menuContainer.addChild(balloonSelector)
-        this.selectors.push(balloonSelector)
-
-        let rocketSelector = new ObjectSelectorButton("rocket", RocketObject)
-        rocketSelector.position.set(107, 100)
-        this.menuContainer.addChild(rocketSelector)
-        this.selectors.push(rocketSelector)
-
-        this.graphics = new Graphics()
-        this.gameContainer.addChild(this.graphics)
-
-        Control.init()
-    }
-
-    unselectSelectors() {
-        this.selectors.forEach(s => s.tint = 0xFFFFFF)
     }
 
     addElement(element: GameElement) {
@@ -126,6 +106,13 @@ export class GameView extends View {
     resize() {
         this.gameContainer.pivot.set(Vars.width / 2 - this.camera.pos.x, Vars.height / 2 - this.camera.pos.y)
         this.gameContainer.position.set(Vars.width / 2, Vars.height / 2)
+
+        this.background.position.set(Vars.width / 2, Vars.height / 2)
+        this.background.anchor.set(0.5)
+        this.background.width = Vars.width
+        this.background.height = Vars.height
+
+        this.menu.resize()
     }
 
     newPolygon(pos: Vector2, radius: number, count: number) {

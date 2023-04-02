@@ -46,7 +46,7 @@ export class Terrain extends GameElement {
 
         this.view.zIndex = ZIndex.TERRAIN
         this.graphics = new Graphics()
-        this.graphics.beginFill(0x888888)
+        this.graphics.beginFill(0x475E3A)
         this.graphics.drawPolygon(this.points)
         this.graphics.endFill()
         this.view.addChild(this.graphics)

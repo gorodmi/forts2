@@ -22,7 +22,7 @@ export class ObjectSelectorButton extends Graphics {
         super();
         this.type = type
 
-        this.interactive = true
+        this.eventMode = `static`
         this.on("click", e => {this.select()})
 
         this.beginFill(0xFFFFFF)
@@ -38,7 +38,7 @@ export class ObjectSelectorButton extends Graphics {
     }
 
     select() {
-        Vars.gameView.unselectSelectors()
+        Vars.gameView.menu.unselectSelectors()
         this.tint = 0x00FF00
         Control.setControlType(ControlType.OBJECT_PLACE)
         Control.removeBuildingObject()

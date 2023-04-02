@@ -9,8 +9,8 @@ export namespace Vars {
     export let gameView: GameView
     export let menuView: MenuView
     export let viewManager: ViewManager
-    export let windowWidth: number = 1280
-    export let windowHeight: number = 720
+    export let windowWidth: number = 1920
+    export let windowHeight: number = 1080
     export let width: number = Vars.windowWidth
     export let height: number = Vars.windowHeight
     export let ratio: number = 1
