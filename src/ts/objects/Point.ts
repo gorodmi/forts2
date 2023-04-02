@@ -1,6 +1,6 @@
 import {IVector2, Vector2} from "../data/Vector2";
 import {Vars} from "../data/Vars";
-import {Container, DisplayObject, Graphics} from "pixi.js";
+import {Graphics} from "pixi.js";
 import {setOrNew} from "../Util";
 import {GameElement} from "./GameElement";
 import {ZIndex} from "./ZIndex";
@@ -13,6 +13,7 @@ export interface IPoint {
     anchor?: boolean
     building?: boolean
     selected?: boolean
+    color?: number
 }
 
 export class Point extends GameElement {
@@ -25,6 +26,7 @@ export class Point extends GameElement {
     anchor: boolean
     building: boolean
     selected: boolean
+    color: number
 
     graphics: Graphics
 
@@ -37,6 +39,7 @@ export class Point extends GameElement {
         this.anchor = params.anchor ?? false
         this.building = params.building ?? false
         this.selected = params.selected ?? false
+        this.color = params.color ?? 0xFFFFFF
 
         this.view.zIndex = ZIndex.POINT
         this.graphics = new Graphics()
@@ -69,7 +72,8 @@ export class Point extends GameElement {
     update(dt: number) {
         super.update(dt)
         if (this.updating) {
-            this.force.add(Vars.gravity.copy.mul(this.mass))
+            this.force.div(this.mass)
+            this.force.add(Vars.gravity)
             this.vel.add(this.force)
             this.force.init()
             this.vel.mul(0.99)
@@ -85,7 +89,7 @@ export class Point extends GameElement {
     draw() {
         this.view.position.set(this.pos.x, this.pos.y)
         if (this.selected) this.graphics.tint = 0x00FF00
-        else this.graphics.tint = 0xFFFFFF
+        else this.graphics.tint = this.color
 
         if (this.building) this.graphics.alpha = 0.5
         else this.graphics.alpha = 1

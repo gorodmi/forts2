@@ -87,9 +87,13 @@ export class GameView extends View {
     }
 
     onShow() {
+        this.menu.pointSelectors[0].select()
+        this.menu.plankSelectors[0].select()
+
         for (let i = 0; i <= 6; i++) {
             this.gameContainer.addChild(new Point({pos: {x: -1000 + i * 100, y: 500}, anchor: true}).view)
         }
+        
         this.newPolygon(new Vector2({x: 0, y: -100}), 100, 4)
         this.newTower(new Vector2({x: -600, y: -100}), 10, 100)
     }

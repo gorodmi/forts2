@@ -1,8 +1,17 @@
-import {Container, Graphics, LINE_CAP, Text, TextMetrics, TextStyle} from "pixi.js";
+import {Container, Graphics, LINE_CAP, Text, TextStyle} from "pixi.js";
 import {ObjectSelectorButton} from "./ObjectSelectorButton";
 import {Vars} from "../data/Vars";
 import {BalloonObject} from "../objects/objectTypes/BalloonObject";
 import {RocketObject} from "../objects/objectTypes/RocketObject";
+import { Plank } from "../objects/Plank";
+import { Point } from "../objects/Point";
+import { PointSelectorButton } from "./PointSelectorButton";
+import { PlankSelectorButton } from "./PlankSelectorButton";
+import { RubberPlank } from "../objects/planks/RubberPlank";
+import { SteelPlank } from "../objects/planks/SteelPlank";
+import { SteelPoint } from "../objects/points/SteelPoint";
+import { Control, ControlType } from "../Control";
+import { RopePlank } from "../objects/planks/RopePlank";
 
 const tabStyle = new TextStyle({
     fontFamily: "monospace",
@@ -24,7 +33,9 @@ export class Menu extends Container {
     objectContainer: Container
     objectTab: Graphics
     objectText: Text
-    selectors: Array<ObjectSelectorButton> = []
+    objectSelectors: Array<ObjectSelectorButton> = []
+    pointSelectors: Array<PointSelectorButton> = []
+    plankSelectors: Array<PlankSelectorButton> = []
     tabs: Array<Graphics> = []
     tabContainers: Array<Container> = []
 
@@ -59,69 +70,78 @@ export class Menu extends Container {
         this.menuButton.lineTo(-10, -10)
         this.addChild(this.menuButton)
 
-        this.pointContainer = new Container()
+        this.pointContainer = new Container();
+        [
+            new PointSelectorButton("point", Point),
+            new PointSelectorButton("steel ball", SteelPoint)
+        ].forEach((s, i) => {
+            s.position.set(Vars.width / 6 / 2, 60 + i * 50)
+            this.pointContainer.addChild(s)
+            this.pointSelectors.push(s)
+        })
         this.addChild(this.pointContainer)
         this.pointTab = new Graphics()
         this.pointTab.eventMode = "dynamic"
+        this.pointTab.cursor = "pointer"
         this.pointTab.on("click", e => this.selectTab(0))
         this.pointTab.beginFill(0xDDAAAA)
         this.pointTab.drawRect(0, 0, Vars.width / 6 / 3, 30)
         this.pointTab.endFill()
         this.pointText = new Text("points", tabStyle)
-        let pointSize = TextMetrics.measureText(this.pointText.text, this.pointText.style)
-        this.pointText.position.set(
-            -pointSize.width / 2 + Vars.width / 6 / 3 / 2,
-            -pointSize.height / 2 + 30 / 2
-        )
+        this.pointText.anchor.set(0.5)
+        this.pointText.position.set(Vars.width / 6 / 3 / 2, 30 / 2)
         this.pointTab.addChild(this.pointText)
         this.addChild(this.pointTab)
 
         this.plankContainer = new Container()
-        this.plankContainer.visible = false
+        this.plankContainer.visible = false;
+        [
+            new PlankSelectorButton("wood", Plank),
+            new PlankSelectorButton("rubber", RubberPlank),
+            new PlankSelectorButton("steel", SteelPlank),
+            new PlankSelectorButton("rope", RopePlank)
+        ].forEach((s, i) => {
+            s.position.set(Vars.width / 6 / 2, 60 + i * 50)
+            this.plankContainer.addChild(s)
+            this.plankSelectors.push(s)
+        })
         this.addChild(this.plankContainer)
         this.plankTab = new Graphics()
         this.plankTab.eventMode = "dynamic"
+        this.plankTab.cursor = "pointer"
         this.plankTab.on("click", e => this.selectTab(1))
         this.plankTab.position.x = Vars.width / 6 / 3
         this.plankTab.beginFill(0xDDAAAA)
         this.plankTab.drawRect(0, 0, Vars.width / 6 / 3, 30)
         this.plankTab.endFill()
         this.plankText = new Text("planks", tabStyle)
-        let plankSize = TextMetrics.measureText(this.plankText.text, this.plankText.style)
-        this.plankText.position.set(
-            -plankSize.width / 2 + Vars.width / 6 / 3 / 2,
-            -plankSize.height / 2 + 30 / 2
-        )
+        this.plankText.anchor.set(0.5)
+        this.plankText.position.set(Vars.width / 6 / 3 / 2, 30 / 2)
         this.plankTab.addChild(this.plankText)
         this.addChild(this.plankTab)
 
         this.objectContainer = new Container()
-        this.objectContainer.visible = false
-
-        let balloonSelector = new ObjectSelectorButton("balloon", BalloonObject)
-        balloonSelector.position.set(107, 50)
-        this.objectContainer.addChild(balloonSelector)
-        this.selectors.push(balloonSelector)
-
-        let rocketSelector = new ObjectSelectorButton("rocket", RocketObject)
-        rocketSelector.position.set(107, 100)
-        this.objectContainer.addChild(rocketSelector)
-        this.selectors.push(rocketSelector)
+        this.objectContainer.visible = false;
+        [
+            new ObjectSelectorButton("balloon", BalloonObject),
+            new ObjectSelectorButton("rocket", RocketObject)
+        ].forEach((s, i) => {
+            s.position.set(Vars.width / 6 / 2, 60 + i * 50)
+            this.objectContainer.addChild(s)
+            this.objectSelectors.push(s)
+        })
         this.addChild(this.objectContainer)
-
         this.objectTab = new Graphics()
         this.objectTab.eventMode = "dynamic"
+        this.objectTab.cursor = "pointer"
         this.objectTab.on("click", e => this.selectTab(2))
         this.objectTab.position.x = Vars.width / 6 / 3 * 2
         this.objectTab.beginFill(0xDDAAAA)
         this.objectTab.drawRect(0, 0, Vars.width / 6 / 3, 30)
         this.objectTab.endFill()
         this.objectText = new Text("objects", tabStyle)
-        let objectSize = TextMetrics.measureText(this.objectText.text, this.objectText.style)
-        this.objectText.position.set(
-            -objectSize.width / 2 + Vars.width / 6 / 3 / 2,
-            -objectSize.height / 2 + 30 / 2
-        )
+        this.objectText.anchor.set(0.5)
+        this.objectText.position.set(Vars.width / 6 / 3 / 2, 30 / 2)
         this.objectTab.addChild(this.objectText)
         this.addChild(this.objectTab)
 
@@ -129,8 +149,16 @@ export class Menu extends Container {
         this.tabContainers.push(this.pointContainer, this.plankContainer, this.objectContainer)
     }
 
+    unselectPoints() {
+        this.pointSelectors.forEach(p => p.unselect())
+    }
+
+    unselectPlanks() {
+        this.plankSelectors.forEach(p => p.unselect())
+    }
+
     unselectSelectors() {
-        this.selectors.forEach(s => s.tint = 0xFFFFFF)
+        this.objectSelectors.forEach(s => s.unselect())
     }
 
     unselectTabs() {
@@ -138,8 +166,8 @@ export class Menu extends Container {
     }
 
     select(num: number) {
-        if (num >= this.selectors.length) return
-        let selector = this.selectors[num]
+        if (num >= this.objectSelectors.length) return
+        let selector = this.objectSelectors[num]
         selector.select()
     }
 

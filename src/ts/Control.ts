@@ -1,10 +1,10 @@
-import {Point} from "./objects/Point";
+import {IPoint, Point} from "./objects/Point";
 import {GameObject, IGameObject} from "./objects/objectTypes/GameObject";
 import {Vars} from "./data/Vars";
-import {Plank} from "./objects/Plank";
+import {IPlank, Plank} from "./objects/Plank";
 import {Vector2} from "./data/Vector2";
 import {Collisions} from "./data/Collisions";
-import {BalloonObject} from "./objects/objectTypes/BalloonObject";
+import { GameElement } from "./objects/GameElement";
 
 export enum ControlType {
     POINT_PLACE,
@@ -15,6 +15,9 @@ export namespace Control {
     export let selectedPoint: Point | undefined
     export let buildingPoint: Point | undefined
     export let buildingObject: GameObject | undefined
+
+    export let pointType: new (data: IPoint) => Point
+    export let plankType: new (data: IPlank) => Plank
 
     export let controlType = ControlType.POINT_PLACE
 
@@ -70,6 +73,19 @@ export namespace Control {
             else if (e.code.startsWith("Digit")) {
                 let digit = Number(e.code.substring(5))
                 Vars.gameView.menu.select(digit - 2)
+            } else if (e.code === "Delete") {
+                Vars.gameView.points.filter(p => p.building).forEach(p => {
+                    Vars.gameView.gameContainer.removeChild(p.view)
+                    p.delete()
+                })
+                Vars.gameView.planks.filter(p => p.building).forEach(p => {
+                    Vars.gameView.gameContainer.removeChild(p.view)
+                    p.delete()
+                })
+                Vars.gameView.objects.filter(o => o.building).forEach(o => {
+                    Vars.gameView.gameContainer.removeChild(o.view)
+                    o.delete()
+                })
             }
         })
 
@@ -81,7 +97,7 @@ export namespace Control {
                     let point = Vars.gameView.getPoint(Vars.gameView.cursorPos, p => p !== buildingPoint)
                     if (point !== undefined) {
                         if (selectedPoint !== undefined && Vars.gameView.canConnect(selectedPoint, point)) {
-                            Vars.gameView.addElement(new Plank({
+                            Vars.gameView.addElement(newPlank({
                                 a: selectedPoint,
                                 b: point,
                                 building: true
@@ -89,7 +105,7 @@ export namespace Control {
                         }
                         select(point)
                     } else if (selectedPoint !== undefined && buildingPoint !== undefined && Vars.gameView.canConnect(selectedPoint, buildingPoint)) {
-                        Vars.gameView.addElement(new Plank({
+                        Vars.gameView.addElement(newPlank({
                             a: selectedPoint,
                             b: buildingPoint,
                             building: true
@@ -106,6 +122,8 @@ export namespace Control {
             } else if (e.button === 1) {
                 unselect()
                 removeBuildingPoint()
+                removeBuildingObject()
+                setControlType(ControlType.POINT_PLACE)
             } else if (e.button === 2) {
                 Vars.gameView.holdingMouse = true
             }
@@ -191,7 +209,7 @@ export namespace Control {
 
     export function addBuildingPoint() {
         if (buildingPoint === undefined || buildingPoint === selectedPoint) {
-            buildingPoint = new Point({building: true})
+            buildingPoint = newPoint({building: true})
             Vars.gameView.addElement(buildingPoint)
             updatePos()
         }
@@ -208,5 +226,13 @@ export namespace Control {
         selectedPoint = point
         selectedPoint.selected = true
         addBuildingPoint()
+    }
+
+    export function newPoint(data: IPoint) {
+        return new pointType(data)
+    }
+
+    export function newPlank(data: IPlank) {
+        return new plankType(data)
     }
 }

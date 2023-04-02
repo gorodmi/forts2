@@ -1,5 +1,5 @@
 import {IPoint, Point} from "./Point";
-import {Container, DisplayObject, Graphics, LINE_CAP} from "pixi.js";
+import {Graphics, LINE_CAP} from "pixi.js";
 import {Vector2} from "../data/Vector2";
 import {Vars} from "../data/Vars";
 import {setOrNew} from "../Util";
@@ -17,6 +17,7 @@ export interface IPlank {
     toughness?: number
     limit?: number
     building?: boolean
+    color?: number
 }
 
 export class Plank extends GameElement {
@@ -29,6 +30,7 @@ export class Plank extends GameElement {
     toughness: number
     limit: number
     building: boolean
+    color: number
     
     graphics: Graphics
 
@@ -40,9 +42,10 @@ export class Plank extends GameElement {
         this.targetLength = params.targetLength ?? this.a.pos.dst(this.b.pos)
         this.maxHealth = params.maxHealth ?? 100
         this.health = params.health ?? this.maxHealth
-        this.toughness = params.toughness ?? 100
+        this.toughness = params.toughness ?? 10
         this.limit = params.limit ?? this.targetLength / 10
         this.building = params.building ?? false
+        this.color = params.color ?? 0x8B4513
 
         this.view.zIndex = ZIndex.PLANK
         this.graphics = new Graphics();
@@ -76,10 +79,14 @@ export class Plank extends GameElement {
         })
     }
 
+    getDiff() {
+        let dst = this.a.pos.dst(this.b.pos)
+        return dst - this.targetLength
+    }
+
     update(dt: number) {
         super.update(dt)
-        let dst = this.a.pos.dst(this.b.pos)
-        let diff = dst - this.targetLength
+        let diff = this.getDiff()
 
         if (this.updating && !(!this.a.updating && !this.b.updating)) {
             let angle = this.a.pos.angle(this.b.pos)
@@ -113,13 +120,13 @@ export class Plank extends GameElement {
             this.delete()
         }
 
-        let healthRatio = this.health / this.maxHealth
-        let green = healthRatio * 255
-        let red = 255 - green
+        this.draw()
+    }
 
+    draw() {
+        let healthRatio = this.health / this.maxHealth
         this.graphics.clear()
-        // (red << 16) | (green << 8)
-        this.graphics.lineStyle({width: healthRatio * 5 + 5, color: 0x8B4513, cap: LINE_CAP.ROUND})
+        this.graphics.lineStyle({width: healthRatio * 5 + 5, color: this.color, cap: LINE_CAP.ROUND})
         this.graphics.moveTo(this.a.pos.x, this.a.pos.y)
         this.graphics.lineTo(this.b.pos.x, this.b.pos.y)
 
